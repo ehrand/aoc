@@ -15,11 +15,11 @@ for _, line in pairs(lines) do
   local tmp = line
 
   print("\n ~> starting: [" .. tmp .. "]")
-  local limit_low = tmp:gsub("%-%d*.*$", "")
+  local limit_low = tonumber(tmp:gsub("%-%d*.*$", ""), 10)
   tmp = tmp:gsub("^%d*%-", "")
   print("low: [" .. limit_low .. "] ~> [" .. tmp .. "]")
 
-  local limit_high = tmp:gsub(" %a: %a*$", "")
+  local limit_high = tonumber(tmp:gsub(" %a: %a*$", ""), 10)
   tmp = tmp:gsub("^%d* ", "")
   print("high: [" .. limit_high .. "] ~> [" .. tmp .. "]")
 
@@ -29,15 +29,16 @@ for _, line in pairs(lines) do
 
   local password = tmp
 
-  local occurrences = 0
-  for i = 1, password:len() do
-    if(password:sub(i, i)  == char) then
-      occurrences = occurrences + 1
+  local valid = false
+  if(password:len() >= limit_high) then
+    if(password:sub(limit_low, limit_low) == char) then
+      valid = (password:sub(limit_high, limit_high) ~= char)
+    else
+      valid = (password:sub(limit_high, limit_high) == char)
     end
   end
-  print("occurrences: " .. occurrences)
 
-  if(occurrences <= tonumber(limit_high)) and (occurrences >= tonumber(limit_low)) then
+  if(valid) then
     print("Found valid password: [" .. line .. "]")
     passwords_count_valid = passwords_count_valid + 1
   end
