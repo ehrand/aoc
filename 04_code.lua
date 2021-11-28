@@ -29,6 +29,92 @@ passport.is_valid = function()
   return passport.byr and passport.ecl and passport.hcl and passport.hgt and passport.iyr and passport.pid and passport.eyr or false
 end
 
+passport.__newindex = function(t, k, v)
+  local valid = true
+  if(k == "byr") then
+    local year = tostring(v)
+    if(year:gsub("%d%d%d%d", ""):len() > 0) then
+      valid = false
+    elseif(tonumber(year, 10) < 1920) then
+      valid = false
+    elseif(tonumber(year, 10) > 2002) then
+      valid = false
+    else
+      valid = true
+    end
+  elseif(k == "iyr") then
+    local year = tostring(v)
+    if(year:gsub("%d%d%d%d", ""):len() > 0) then
+      valid = false
+    elseif(tonumber(year, 10) < 2010) then
+      valid = false
+    elseif(tonumber(year, 10) > 2020) then
+      valid = false
+    else
+      valid = true
+    end
+  elseif(k == "eyr") then
+    local year = tostring(v)
+    if(year:gsub("%d%d%d%d", ""):len() > 0) then
+      valid = false
+    elseif(tonumber(year, 10) < 2020) then
+      valid = false
+    elseif(tonumber(year, 10) > 2030) then
+      valid = false
+    else
+      valid = true
+    end
+  elseif(k == "hgt") then
+    local height = tonumber(tostring(v):gsub("%a%a$", ""), 10)
+    local unit = tostring(v):gsub("^%d*", "")
+    if(unit == "cm") then
+      if(height < 150) then
+        valid = false
+      elseif(height > 193) then
+        valid = false
+      else
+        valid = true
+      end
+    elseif(unit == "in") then
+      if(height < 59) then
+        valid = false
+      elseif(height > 76) then
+        valid = false
+      else
+        valid = true
+      end
+    else
+      valid = false
+    end
+  elseif(k == "hcl") then
+    if(tostring(v):gsub("^#%x%x%x%x%x%x$", ""):len() > 0) then
+      valid = false
+    else
+      valid = true
+    end
+  elseif(k == "ecl") then
+    local color = tostring(v)
+    if((color == "amb") or (color == "blu") or (color == "brn") or (color == "gry") or (color == "grn") or (color == "hzl") or (color == "oth")) then
+      valid = true
+    else
+      valid = false
+    end
+  elseif(k == "pid") then
+    local number = tostring(v)
+    if(number:gsub("^%d%d%d%d%d%d%d%d%d$", ""):len() > 0) then
+      valid = false
+    else
+      valid = true
+    end
+  end
+
+  if(true == valid) then
+    rawset(t, k, v)
+  end
+end
+
+setmetatable(passport, passport)
+
 local passports_valid = 0
 local passports_total = 0
 for _, v in ipairs(data) do
@@ -37,7 +123,6 @@ for _, v in ipairs(data) do
     -- an empty line separates two password entries (and last line in the file is an empty line)
     passports_total = passports_total + 1
     passport.invalidate()
-    print("\n")
   else
     print("Processing entry [" .. line .. "]")
     while(#line > 0) do
