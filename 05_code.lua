@@ -2,6 +2,7 @@
 
 local reader = require("reader"):new()
 local data = reader("./05_data.txt")
+local taken_ids = {}
 
 local max = 0
 for _, v in ipairs(data) do
@@ -23,7 +24,21 @@ for _, v in ipairs(data) do
   end
 
   local id = (col * 8) + row
+  table.insert(taken_ids, id)
   max = math.max(id, max)
 end
 
 print("Maximum seat number is: " .. max)
+
+table.sort(taken_ids, function(a, b) return a < b end)
+--for _, v in ipairs(taken_ids) do
+--  print("Taken id: " .. v)
+--end
+
+local idx = 1
+while(idx < #taken_ids) do
+  if(taken_ids[idx] + 2 == taken_ids[idx + 1]) then
+    print("Your seat id is: " .. taken_ids[idx] + 1)
+  end
+  idx = idx + 1
+end
