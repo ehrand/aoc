@@ -7,25 +7,31 @@ local sum_total = 0
 local answers = {}
 
 local handle_group_ready = function()
-    local sum_group = 0
-    for _, _ in pairs(answers) do
-      sum_group = sum_group + 1
+    local answers_group = nil
+    for _, v in pairs(answers) do
+      local answers_single = tostring(v)
+      answers_group = answers_group or answers_single
+      local answers_common = ""
+      for c in answers_single:gmatch(".") do
+        if(answers_group:find(c)) then
+          answers_common = answers_common .. c
+        end
+      end
+      answers_group = answers_common
     end
-    sum_total  = sum_total + sum_group
-    answers = {}
+    return answers_group:len()
 end
 
 for _, v in ipairs(data) do
   if(tostring(v) == "") then
-    handle_group_ready()
+    sum_total = sum_total + handle_group_ready()
+    answers = {}
   else
-    for c in v:gmatch(".") do
-      answers[c] = 1
-    end
+    table.insert(answers, v)
   end
 end
 
 -- there is no empty line after the last group
-handle_group_ready()
+sum_total = sum_total + handle_group_ready()
 
-print("Total number of yes-anwers: " .. sum_total)
+print("Total number of yes-answers: " .. sum_total)
