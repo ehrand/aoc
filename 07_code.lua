@@ -43,56 +43,51 @@ for _, b in pairs(data) do
   local name = line:match("%l* %l*", 1)
   line = line:gsub("%l* %l* bags contain ", "")
   if(line ~= "no other bags.") then
-    line = line:gsub("%d%s", "")
-    for chld in line:gmatch("%l* %l* bag[s]?") do
+    for chld in line:gmatch("%d* %l* %l* bag[s]?") do
       chld = chld:gsub("%sbag[s]?", "")
+      local count = tonumber(chld:match("%d*", 1), 10)
+      local id = chld:gsub("%d* ", "", 1)
+      print('Children: ' .. count .. '/' .. id)
+      while count > 0 do
+        table.insert(children, Bag:new({name = id}))
+        count = count - 1
+      end
       line = line:gsub("%l* %l* bag[s]?[,.] ?", "", 1)
-      table.insert(children, Bag:new({name = chld}))
     end
   end
   local bag = Bag:new({name = name, parent = nil, children = children})
+  print('Inserting ' .. tostring(bag))
   table.insert(bags, bag)
-
 end
 
 ------------------------------------------------------------------------------------------
 
-local my_bag_containers = {}
-local my_bag_name = "shiny gold"
-local insert_if_not_available = function(t, e)
-  for _, v in pairs(t) do
-    if(tostring(v) == tostring(e)) then
-      return nil
-    end
-  end
-  table.insert(t, e)
-  print("Inserted [" .. tostring(e) .. "]")
-  return true
-end
-
--- find all direct parents of my bag
-for _, prnt in pairs(bags) do
-  for _, chld in pairs(prnt.children) do
-    if(chld.name == my_bag_name) then
-      insert_if_not_available(my_bag_containers, prnt.name)
-    end
-  end
-end
-
--- now let's find all the parents of parents and so on...
-local going_on = true
-while(going_on) do
-  going_on = false
-  for _, v in pairs(my_bag_containers) do
-    for _, prnt in pairs(bags) do
-      for _, chld in pairs(prnt.children) do
-        if(chld.name == v) then
-          local inserted = insert_if_not_available(my_bag_containers, prnt.name)
-          going_on = going_on or inserted
-        end
+local add_children_of_to = function(bag_name, t)
+  for _, b in pairs(bags) do
+    if tostring(bag_name) == b.name then
+      for _, c in pairs(b.children) do
+        table.insert(t, c.name)
       end
+      return true
+    end
+  end
+  return false
+end
+
+-- now let us get our bag and all its children and put it in a new container
+local bags_summarized = {}
+add_children_of_to("shiny gold", bags_summarized)
+print('Our bag contains ' .. #bags_summarized)
+
+local something_done = true
+while something_done do
+  something_done = false
+  for k, b in pairs(bags_summarized) do
+    if tostring(b) ~= 'processed' then
+      add_children_of_to(tostring(b), bags_summarized)
+      bags_summarized[k] = 'processed'
+      something_done = true
     end
   end
 end
-
-print("Total container size " .. #my_bag_containers)
+print('Our bag contains ' .. #bags_summarized .. ' other bags in total')
