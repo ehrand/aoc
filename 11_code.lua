@@ -46,6 +46,16 @@ local energy_find_first_flashable = function(nums)
   return nil, nil
 end
 
+local energy_sum = function(nums)
+  local sum = 0
+  for _, row in pairs(nums) do
+    for _, energy_level in pairs(row) do
+      sum = sum + energy_level
+    end
+  end
+  return sum
+end
+
 ------------------------------------------------------------------------------------------
 
 -- convert 'data' into two dimensional integer array
@@ -61,7 +71,7 @@ end
 
 ------------------------------------------------------------------------------------------
 
-for i = 1, 100 do
+for i = 1, 1000 do
   print(string.format("Step [%02d]", i))
   energy_increment_all(numbers)
   local idx_row, idx_col = energy_find_first_flashable(numbers)
@@ -69,6 +79,11 @@ for i = 1, 100 do
     energy_print(numbers)
     energy_flash(idx_row, idx_col, numbers)
     idx_row, idx_col = energy_find_first_flashable(numbers)
+  end
+
+  if (energy_sum(numbers) == 0) then
+    print(string.format("All octopuses flashed during step [%04d]", i))
+    break
   end
 end
 
